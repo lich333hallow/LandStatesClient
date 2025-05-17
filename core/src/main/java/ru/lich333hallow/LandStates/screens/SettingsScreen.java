@@ -4,11 +4,15 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
@@ -18,19 +22,21 @@ public class SettingsScreen implements Screen {
     private final Main main;
 
     private Stage stage;
-    private BitmapFont font72Green;
 
-    private Label title;
-    private Label language;
-    private Label music;
-    private Label back;
+    private TextButton language;
+    private TextButton music;
+    private TextButton back;
 
-    private String currentLanguage = "Русский";
+    private Sprite backgroundSprite;
+    private Batch batch;
+
+    private String currentLanguage = "Английский";
     private String currentMusic = "Вкл";
 
     public SettingsScreen(Main main) {
         this.main = main;
-        font72Green = main.getFont72Green();
+
+        batch = main.getBatch();
     }
 
     @Override
@@ -42,14 +48,17 @@ public class SettingsScreen implements Screen {
         table.setFillParent(true);
         stage.addActor(table);
 
-        Label.LabelStyle labelStyle = new Label.LabelStyle(font72Green, Color.GREEN);
+        backgroundSprite = new Sprite(main.getImageBackGround());
+        backgroundSprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        title = new Label("Настройки", labelStyle);
-        language = new Label("Язык: " + currentLanguage, labelStyle);
-        music = new Label("Музыка: " + currentMusic, labelStyle);
-        back = new Label("Вернуться", labelStyle);
+        language = new TextButton("Язык: " + currentLanguage, main.getMenuTextButtonStyle());
+        music = new TextButton("Музыка: " + currentMusic, main.getMenuTextButtonStyle());
+        back = new TextButton("Вернуться", main.getMenuTextButtonStyle());
 
-        table.add(title).padBottom(40).row();
+        language.pack();
+        music.pack();
+        back.pack();
+
         table.add(language).padBottom(20).row();
         table.add(music).padBottom(20).row();
         table.add(back);
@@ -59,6 +68,7 @@ public class SettingsScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 currentLanguage = currentLanguage.equals("Русский") ? "Английский" : "Русский";
                 language.setText("Язык: " + currentLanguage);
+                language.pack();
             }
         });
 
@@ -67,6 +77,7 @@ public class SettingsScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 currentMusic = currentMusic.equals("Вкл") ? "Выкл" : "Вкл";
                 music.setText("Музыка: " + currentMusic);
+                music.pack();
             }
         });
 
@@ -82,6 +93,11 @@ public class SettingsScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        batch.begin();
+        backgroundSprite.draw(batch);
+        batch.end();
+
         stage.act(delta);
         stage.draw();
     }

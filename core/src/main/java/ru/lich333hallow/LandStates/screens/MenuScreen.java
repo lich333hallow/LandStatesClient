@@ -2,16 +2,13 @@ package ru.lich333hallow.LandStates.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
@@ -22,34 +19,34 @@ public class MenuScreen implements Screen {
 
     private final Main main;
     private SpriteBatch batch;
-    private OrthographicCamera camera;
-    private BitmapFont font72Green;
 
-    private Texture imageBackGround;
+    private Sprite backgroundSprite;
 
     private Stage stage;
     private Table table;
 
-    private Label play;
-    private Label settings;
-    private Label exit;
+    private TextButton play;
+    private TextButton settings;
+    private TextButton exit;
 
     public MenuScreen(Main main) {
         this.main = main;
 
-        font72Green = main.getFont72Green();
         batch = main.getBatch();
 
         table = new Table();
         stage = new Stage(new ScreenViewport());
 
-        Label.LabelStyle labelStyle = new Label.LabelStyle(font72Green, Color.GREEN);
+        backgroundSprite = new Sprite(main.getImageBackGround());
+        backgroundSprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        play = new Label("Создать лобби", labelStyle);
-        settings = new Label("Настройки", labelStyle);
-        exit = new Label("Выйти", labelStyle);
+        play = new TextButton("Создать лобби", main.getMenuTextButtonStyle());
+        settings = new TextButton("Настройки", main.getMenuTextButtonStyle());
+        exit = new TextButton("Выйти", main.getMenuTextButtonStyle());
 
-        imageBackGround = new Texture(Gdx.files.internal("backgrounds/space0.png"));
+        play.pack();
+        settings.pack();
+        exit.pack();
 
         play.addListener(new ClickListener(){
             @Override
@@ -91,6 +88,9 @@ public class MenuScreen implements Screen {
         Gdx.gl.glClearColor(0,  0,  0 , 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         Gdx.input.setInputProcessor(stage);
+        batch.begin();
+        backgroundSprite.draw(batch);
+        batch.end();
         stage.act();
         stage.draw();
     }
@@ -110,5 +110,6 @@ public class MenuScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        batch.dispose();
     }
 }
