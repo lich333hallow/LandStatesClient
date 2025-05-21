@@ -8,26 +8,27 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import ru.lich333hallow.LandStates.Main;
+import ru.lich333hallow.LandStates.components.Button;
+import ru.lich333hallow.LandStates.models.Player;
 
 
 public class MenuScreen implements Screen {
 
     private final Main main;
-    private SpriteBatch batch;
+    private final SpriteBatch batch;
 
-    private Sprite backgroundSprite;
+    private final Sprite backgroundSprite;
 
-    private Stage stage;
+    private final Stage stage;
     private Table table;
 
-    private TextButton play;
-    private TextButton settings;
-    private TextButton exit;
+    private Button play;
+    private Button settings;
+    private Button exit;
 
     public MenuScreen(Main main) {
         this.main = main;
@@ -40,9 +41,9 @@ public class MenuScreen implements Screen {
         backgroundSprite = new Sprite(main.getImageBackGround());
         backgroundSprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        play = new TextButton("Создать лобби", main.getMenuTextButtonStyle());
-        settings = new TextButton("Настройки", main.getMenuTextButtonStyle());
-        exit = new TextButton("Выйти", main.getMenuTextButtonStyle());
+        play = new Button("Играть", main.getMenuTextButtonStyle());
+        settings = new Button("Настройки", main.getMenuTextButtonStyle());
+        exit = new Button("Выйти", main.getMenuTextButtonStyle());
 
         play.pack();
         settings.pack();
@@ -51,7 +52,15 @@ public class MenuScreen implements Screen {
         play.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                main.setScreen(main.getCreatingScreen());
+
+                Player player = main.getPlayer();
+
+                if (player.getName() == null || player.getPlayerId() == null){
+                   main.setScreen(main.getPlayerDataScreen());
+                   return;
+                }
+
+                main.setScreen(main.getChooseModeScreen());
             }
         });
 
@@ -80,23 +89,28 @@ public class MenuScreen implements Screen {
 
     @Override
     public void show() {
-        Gdx.graphics.setForegroundFPS(10);
+        Gdx.graphics.setForegroundFPS(30);
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0,  0,  0 , 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         Gdx.input.setInputProcessor(stage);
+
         batch.begin();
         backgroundSprite.draw(batch);
         batch.end();
-        stage.act();
+
+        stage.act(delta);
         stage.draw();
     }
 
     @Override
-    public void resize(int width, int height) {}
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
 
     @Override
     public void pause() {}

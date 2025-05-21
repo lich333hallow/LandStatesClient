@@ -1,7 +1,6 @@
 package ru.lich333hallow.LandStates.screens;
 
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
 import ru.lich333hallow.LandStates.Main;
 
@@ -22,7 +21,9 @@ public class ResultsScreen implements Screen {
     public void render(float delta) {}
 
     @Override
-    public void resize(int width, int height) {}
+    public void resize(int width, int height) {
+
+    }
 
     @Override
     public void pause() {}

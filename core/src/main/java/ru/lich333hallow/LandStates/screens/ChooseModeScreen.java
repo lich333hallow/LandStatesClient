@@ -8,33 +8,29 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import ru.lich333hallow.LandStates.Main;
-import ru.lich333hallow.LandStates.network.ClientNetwork;
+import ru.lich333hallow.LandStates.components.Button;
+import ru.lich333hallow.LandStates.network.WebSocketClient;
 
-public class CreatingScreen implements Screen {
+public class ChooseModeScreen implements Screen {
 
     private final Main main;
-    private final ClientNetwork clientNetwork;
     private Stage stage;
     private Table table;
     private Batch batch;
 
-    private boolean connected = false;
-
     private Sprite backgroundSprite;
 
-    private TextButton findGame;
-    private TextButton createMultiplayerGame;
-    private TextButton createSoloGame;
-    private TextButton back;
+    private Button findGame;
+    private Button createMultiplayerGame;
+    private Button createSoloGame;
+    private Button back;
 
-    public CreatingScreen(Main main){
+    public ChooseModeScreen(Main main){
         this.main = main;
-        this.clientNetwork = new ClientNetwork();
     }
 
     @Override
@@ -43,17 +39,15 @@ public class CreatingScreen implements Screen {
         table = new Table();
         Gdx.input.setInputProcessor(stage);
 
-        clientNetwork.connect();
-
         batch = main.getBatch();
 
         backgroundSprite = new Sprite(main.getImageBackGround());
         backgroundSprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        findGame = new TextButton("Найти игру", main.getMenuTextButtonStyle());
-        createMultiplayerGame = new TextButton("Создать лобби", main.getMenuTextButtonStyle());
-        createSoloGame = new TextButton("Одиночная игра", main.getMenuTextButtonStyle());
-        back = new TextButton("Вернуться", main.getMenuTextButtonStyle());
+        findGame = new Button("Найти игру", main.getMenuTextButtonStyle());
+        createMultiplayerGame = new Button("Создать лобби", main.getMenuTextButtonStyle());
+        createSoloGame = new Button("Одиночная игра", main.getMenuTextButtonStyle());
+        back = new Button("Назад", main.getMenuTextButtonStyle());
 
         findGame.pack();
         createMultiplayerGame.pack();
@@ -63,14 +57,14 @@ public class CreatingScreen implements Screen {
         findGame.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                connected = true;
+                main.setScreen(main.getAvailableLobbiesScreen());
             }
         });
 
         createMultiplayerGame.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                clientNetwork.sendMessage("Hi");
+                main.setScreen(main.getCreatingLobbyScreen());
             }
         });
 
@@ -104,13 +98,13 @@ public class CreatingScreen implements Screen {
         backgroundSprite.draw(batch);
         batch.end();
 
-        stage.act();
+        stage.act(delta);
         stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
@@ -131,6 +125,5 @@ public class CreatingScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-        clientNetwork.disconnect();
     }
 }

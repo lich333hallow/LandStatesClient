@@ -17,20 +17,21 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import ru.lich333hallow.LandStates.Main;
+import ru.lich333hallow.LandStates.components.Button;
 
 public class SettingsScreen implements Screen {
     private final Main main;
 
     private Stage stage;
 
-    private TextButton language;
-    private TextButton music;
-    private TextButton back;
+    private Button language;
+    private Button music;
+    private Button back;
 
     private Sprite backgroundSprite;
     private Batch batch;
 
-    private String currentLanguage = "Английский";
+    private String currentLanguage = "English";
     private String currentMusic = "Вкл";
 
     public SettingsScreen(Main main) {
@@ -46,27 +47,27 @@ public class SettingsScreen implements Screen {
 
         Table table = new Table();
         table.setFillParent(true);
-        stage.addActor(table);
+
 
         backgroundSprite = new Sprite(main.getImageBackGround());
         backgroundSprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        language = new TextButton("Язык: " + currentLanguage, main.getMenuTextButtonStyle());
-        music = new TextButton("Музыка: " + currentMusic, main.getMenuTextButtonStyle());
-        back = new TextButton("Вернуться", main.getMenuTextButtonStyle());
+        language = new Button("Язык: " + currentLanguage, main.getMenuTextButtonStyle());
+        music = new Button("Музыка: " + currentMusic, main.getMenuTextButtonStyle());
+        back = new Button("Назад", main.getMenuTextButtonStyle());
 
         language.pack();
         music.pack();
         back.pack();
 
-        table.add(language).padBottom(20).row();
-        table.add(music).padBottom(20).row();
+        table.add(language).padBottom(20).padRight(20).row();
+        table.add(music).padBottom(20).padRight(20).row();
         table.add(back);
 
         language.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                currentLanguage = currentLanguage.equals("Русский") ? "Английский" : "Русский";
+                currentLanguage = currentLanguage.equals("Русский") ? "English" : "Русский";
                 language.setText("Язык: " + currentLanguage);
                 language.pack();
             }
@@ -87,6 +88,7 @@ public class SettingsScreen implements Screen {
                 main.setScreen(main.getMenuScreen());
             }
         });
+        stage.addActor(table);
     }
 
     @Override

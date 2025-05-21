@@ -1,0 +1,42 @@
+{
+  "English": {
+    "Играть": "Play",
+    "Настройки": "Settings",
+    "Выйти": "Exit",
+    "Язык": "Language",
+    "Музыка": "Music",
+    "Вкл": "On",
+    "Выкл": "Off",
+    "Найти игру": "Find name",
+    "Создать лобби": "Create lobby",
+    "Одиночная игра": "Single game",
+    "Игроки": "Players",
+    "Хост": "Host",
+    "Обновить": "Refresh",
+    "Назад": "Back",
+    "Название лобби": "Lobby name",
+    "Время игры": "Game time",
+    "Количество игроков": "Number of players",
+    "Готов": "Ready"
+  },
+  "Russian": {
+    "Play": "Играть",
+    "Settings": "Настройки",
+    "Exit": "Выйти",
+    "Language": "Язык",
+    "Music": "Музыка",
+    "On": "Вкл",
+    "Off": "Выкл",
+    "Find name": "Найти игру",
+    "Create lobby": "Создать лобби",
+    "Single game": "Одиночная игра",
+    "Players": "Игроки",
+    "Host": "Хост",
+    "Refresh": "Обновить",
+    "Back": "Назад",
+    "Lobby name": "Название лобби",
+    "Game time": "Время игры",
+    "Number of players": "Количество игроков",
+    "Ready": "Готов"
+  }
+}
