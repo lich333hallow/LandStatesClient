@@ -3,6 +3,7 @@ package ru.lich333hallow.LandStates;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -12,9 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -33,8 +32,8 @@ import ru.lich333hallow.LandStates.screens.SettingsScreen;
 @Setter
 public class Main extends Game {
 
-    public static final String url = "http://192.168.1.246:8080/api/";
-    public static final String urlWebSocket = "ws://192.168.1.246:8080/ws/";
+    public static final String url = "http://bbb.eduworks.ru:8080/api/";
+    public static final String urlWebSocket = "ws://bbb.eduworks.ru:8080/ws/";
 
     public static final int cost = 25;
 
@@ -51,7 +50,7 @@ public class Main extends Game {
     private Texture coin;
 
     private Texture miner_1;
-    private Texture defender_1;
+    private Image defender_1;
     private Image base_1;
 
     private Texture miner_2;
@@ -66,6 +65,7 @@ public class Main extends Game {
     private Texture defender_4;
     private Image base_4;
 
+    private Music music;
 
     private GameScreen gameScreen;
     private MenuScreen menuScreen;
@@ -76,6 +76,9 @@ public class Main extends Game {
     private PlayerDataScreen playerDataScreen;
     private LobbyScreen lobbyScreen;
     private AvailableLobbiesScreen availableLobbiesScreen;
+
+    private String stateMusic;
+
 
     @Override
     public void create() {
@@ -88,6 +91,14 @@ public class Main extends Game {
         NinePatch upPatch = new NinePatch(new Texture(Gdx.files.internal("button/up.png")), 10, 10, 10, 10);
         NinePatch downPatch = new NinePatch(new Texture(Gdx.files.internal("button/down.png")), 10, 10, 10, 10);
 
+        music = Gdx.audio.newMusic(Gdx.files.internal("Mystic Cloud - Simpukka chilli.mp3"));
+        player = new Player();
+        loadPrefs();
+        if (stateMusic.equals("Вкл")){
+            music.play();
+        }
+        music.setLooping(true);
+
         menuTextButtonStyle = new TextButton.TextButtonStyle();
         menuTextButtonStyle.font = font72DarkGreenWithOutLine;
         menuTextButtonStyle.up = new NinePatchDrawable(upPatch);
@@ -95,7 +106,7 @@ public class Main extends Game {
 
         base_1 = new Image(new Texture(Gdx.files.internal("bases/1_1.png")));
         miner_1 = new Texture(Gdx.files.internal("bases/2_1.png"));
-        defender_1 = new Texture(Gdx.files.internal("bases/3_1.png"));
+        defender_1 = new Image(new Texture(Gdx.files.internal("bases/3_1.png")));
 
         base_2 = new Image(new Texture(Gdx.files.internal("bases/1_2.png")));
         miner_2 = new Texture(Gdx.files.internal("bases/2_2.png"));
@@ -115,9 +126,6 @@ public class Main extends Game {
         enterNameTextAreaStyle.font = new BitmapFont();
         enterNameTextAreaStyle.fontColor = Color.CYAN;
 
-        player = new Player();
-        loadPrefs();
-
         gameScreen = new GameScreen(this);
         menuScreen = new MenuScreen(this);
         settingsScreen = new SettingsScreen(this);
@@ -128,7 +136,8 @@ public class Main extends Game {
         lobbyScreen = new LobbyScreen(this);
         availableLobbiesScreen = new AvailableLobbiesScreen(this);
 
-        setScreen(gameScreen);
+
+        setScreen(menuScreen);
     }
 
     private void loadPrefs(){
@@ -136,6 +145,7 @@ public class Main extends Game {
 
         String name = preferences.getString("name", null);
         String playerId = preferences.getString("playerId", null);
+        stateMusic = preferences.getString("music", "Вкл");
         if(name == null || playerId == null){
             return;
         }
@@ -158,7 +168,6 @@ public class Main extends Game {
         miner_3.dispose();
         miner_4.dispose();
 
-        defender_1.dispose();
         defender_2.dispose();
         defender_3.dispose();
         defender_4.dispose();

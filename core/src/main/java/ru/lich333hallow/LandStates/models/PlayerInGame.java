@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class PlayerInGame {
     private String name;
+    private String number;
     private int balance;
     private int miners;
     private int defenders;

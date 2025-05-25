@@ -1,6 +1,7 @@
 package ru.lich333hallow.LandStates.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -52,33 +53,41 @@ public class SettingsScreen implements Screen {
         backgroundSprite = new Sprite(main.getImageBackGround());
         backgroundSprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        language = new Button("Язык: " + currentLanguage, main.getMenuTextButtonStyle());
+//        language = new Button("Язык: " + currentLanguage, main.getMenuTextButtonStyle());
         music = new Button("Музыка: " + currentMusic, main.getMenuTextButtonStyle());
         back = new Button("Назад", main.getMenuTextButtonStyle());
 
-        language.pack();
+//        language.pack();
         music.pack();
         back.pack();
 
-        table.add(language).padBottom(20).padRight(20).row();
+//        table.add(language).padBottom(20).padRight(20).row();
         table.add(music).padBottom(20).padRight(20).row();
         table.add(back);
 
-        language.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                currentLanguage = currentLanguage.equals("Русский") ? "English" : "Русский";
-                language.setText("Язык: " + currentLanguage);
-                language.pack();
-            }
-        });
+//        language.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                currentLanguage = currentLanguage.equals("Русский") ? "English" : "Русский";
+//                language.setText("Язык: " + currentLanguage);
+//                language.pack();
+//            }
+//        });
 
         music.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                currentMusic = currentMusic.equals("Вкл") ? "Выкл" : "Вкл";
+                currentMusic = main.getStateMusic().equals("Вкл") ? "Выкл" : "Вкл";
+                main.setStateMusic(currentMusic);
+                System.out.println(currentMusic);
+                if(currentLanguage.equals("Выкл")){
+                    main.getMusic().stop();
+                } else {
+                    main.getMusic().play();
+                }
                 music.setText("Музыка: " + currentMusic);
                 music.pack();
+                saveMusicRef();
             }
         });
 
@@ -102,6 +111,12 @@ public class SettingsScreen implements Screen {
 
         stage.act(delta);
         stage.draw();
+    }
+
+    private void saveMusicRef(){
+        Preferences preferences = Gdx.app.getPreferences("LandStatePrefs");
+        preferences.putString("music", main.getStateMusic());
+        preferences.flush();
     }
 
     @Override

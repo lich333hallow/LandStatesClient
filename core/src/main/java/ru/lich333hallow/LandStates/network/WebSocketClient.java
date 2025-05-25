@@ -13,6 +13,8 @@ import com.github.czyzby.websocket.data.WebSocketCloseCode;
 import com.github.czyzby.websocket.data.WebSocketException;
 import com.github.czyzby.websocket.data.WebSocketState;
 
+import ru.lich333hallow.LandStates.models.Player;
+
 public class WebSocketClient {
     private WebSocket webSocket;
     private final String serverUrl;
@@ -145,16 +147,6 @@ public class WebSocketClient {
         for (WebSocketListener listener : listeners) {
             listener.errorOccurred(error);
         }
-    }
-
-    public void sendJoinLobbyRequest(String lobbyId, String playerId, String playerName) {
-        JsonValue json = new JsonValue(JsonValue.ValueType.object);
-        json.addChild("type", new JsonValue("JOIN"));
-        json.addChild("lobbyId", new JsonValue(lobbyId));
-        json.addChild("playerId", new JsonValue(playerId));
-        json.addChild("playerName", new JsonValue(playerName));
-
-        sendMessage(json.toJson(JsonWriter.OutputType.json));
     }
 }
 

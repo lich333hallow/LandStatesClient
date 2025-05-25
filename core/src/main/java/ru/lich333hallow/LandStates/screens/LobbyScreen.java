@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -102,7 +103,6 @@ public class LobbyScreen implements Screen {
 
             @Override
             public void messageReceived(String message) {
-                System.out.println("something");
                 Gdx.app.postRunnable(() -> handleWebSocketMessage(message));
             }
 
@@ -261,17 +261,11 @@ public class LobbyScreen implements Screen {
                     newPlayers.add(player1);
                 }
 
-                System.out.println(lobby.getLobbyId());
-
                 updatePlayersList(newPlayers);
 
             } else if ("START_GAME".equals(type)){
-
-                webSocketClient.disconnect();
                 main.getGameScreen().setLobby(lobby);
                 main.setScreen(main.getGameScreen());
-                System.out.println("Start a game");
-
             }
         } catch (Exception e) {
             Gdx.app.error("WebSocketLobby", "Error: " + e.getMessage());
@@ -280,8 +274,6 @@ public class LobbyScreen implements Screen {
 
     private void updatePlayersList(List<Player> newPlayers) {
         players = new ArrayList<>();
-        System.out.println(players);
-        System.out.println(newPlayers);
         players.addAll(newPlayers);
         createTableHeader();
 

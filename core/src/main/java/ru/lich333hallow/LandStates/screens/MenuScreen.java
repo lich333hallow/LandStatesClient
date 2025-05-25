@@ -42,11 +42,11 @@ public class MenuScreen implements Screen {
         backgroundSprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         play = new Button("Играть", main.getMenuTextButtonStyle());
-        settings = new Button("Настройки", main.getMenuTextButtonStyle());
+//        settings = new Button("Настройки", main.getMenuTextButtonStyle());
         exit = new Button("Выйти", main.getMenuTextButtonStyle());
 
         play.pack();
-        settings.pack();
+//        settings.pack();
         exit.pack();
 
         play.addListener(new ClickListener(){
@@ -64,12 +64,12 @@ public class MenuScreen implements Screen {
             }
         });
 
-        settings.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                main.setScreen(main.getSettingsScreen());
-            }
-        });
+//        settings.addListener(new ClickListener(){
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                main.setScreen(main.getSettingsScreen());
+//            }
+//        });
 
         exit.addListener(new ClickListener(){
             @Override
@@ -79,7 +79,7 @@ public class MenuScreen implements Screen {
         });
 
         table.add(play).padBottom(50).row();
-        table.add(settings).padBottom(50).row();
+//        table.add(settings).padBottom(50).row();
         table.add(exit).row();
         table.setFillParent(true);
         table.center();
