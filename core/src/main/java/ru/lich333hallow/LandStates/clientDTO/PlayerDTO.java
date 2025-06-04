@@ -1,4 +1,4 @@
-package ru.lich333hallow.LandStates.models;
+package ru.lich333hallow.LandStates.clientDTO;
 
 import java.util.List;
 
@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlayerInGame {
+public class PlayerDTO {
     private String name;
     private int number;
     private String color;
     private int balance;
-    private List<State> bases;
+    private List<StateDTO> bases;
 }

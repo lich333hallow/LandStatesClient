@@ -38,7 +38,7 @@ public class LobbyScreen implements Screen {
 
     private final Main main;
     @Getter
-    private final WebSocketClient webSocketClient;
+    private WebSocketClient webSocketClient;
 
     @Setter
     private boolean join = false;
@@ -65,8 +65,6 @@ public class LobbyScreen implements Screen {
 
     public LobbyScreen(Main main) {
         this.main = main;
-        this.webSocketClient = main.getCreatingLobbyScreen().getWebSocketClient();
-
         runnableCallback = new RunnableCallback() {
             @Override
             public void onComplete() {
@@ -89,10 +87,20 @@ public class LobbyScreen implements Screen {
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
+        this.webSocketClient = new WebSocketClient(Main.urlWebSocket + "lobby");
+        webSocketClient.disconnect();
+        webSocketClient.connect();
 
         webSocketClient.addListener(new WebSocketListener() {
             @Override
             public void connected() {
+                Gdx.app.postRunnable(() -> {
+                    if (!join) {
+                        loadMockPlayers();
+                    } else {
+                        runnableCallback.onComplete();
+                    }
+                });
                 Gdx.app.log("WebSocketLobbyConnect", "connected");
             }
 
@@ -131,8 +139,6 @@ public class LobbyScreen implements Screen {
 
         stage.addActor(mainTable);
         Gdx.input.setInputProcessor(stage);
-
-        loadMockPlayers();
     }
 
     private void webSocketAction(String type, boolean ready){
@@ -141,6 +147,7 @@ public class LobbyScreen implements Screen {
         joinMessage.addChild("playerName", new JsonValue(main.getPlayer().getName()));
         joinMessage.addChild("lobbyId", new JsonValue(lobby.getLobbyId()));
         joinMessage.addChild("numberOfPlayers", new JsonValue(lobby.getNumberOfPlayers() + ""));
+        joinMessage.addChild("color", new JsonValue(main.getPlayer().getColor()));
         joinMessage.addChild("ready", new JsonValue(ready));
         webSocketClient.sendMessage(joinMessage.toJson(JsonWriter.OutputType.json));
     }
@@ -163,10 +170,6 @@ public class LobbyScreen implements Screen {
     }
 
     private void loadMockPlayers() {
-        if(join) {
-            runnableCallback.onComplete();
-            return;
-        };
         NetworkClient.get(Main.url + "getLobbyByHost/" + main.getPlayer().getPlayerId() + "/true", new HttpResponseListener() {
             @Override
             public void onSuccess(int statusCode, String response) {
@@ -187,13 +190,17 @@ public class LobbyScreen implements Screen {
                             Player player1 = new Player();
                             player1.setPlayerId(player.getString("playerId"));
                             player1.setName(player.getString("name"));
+                            player1.setColor(player.getString("color"));
                             playerList.add(player1);
                         }
+
+                        System.out.println(playerList);
 
                         lobby.setPlayerDTOS(playerList);
                         lobby.setActive(true);
                         lobby.setNowPlayers(jsonValue.getInt("nowPlayers"));
                         lobby.setLobbyName(jsonValue.getString("lobbyName"));
+                        updatePlayersList(playerList);
                         Gdx.app.log("LobbyScreenGetLobby", "Lobby success");
                     } catch (Exception e){
                         Gdx.app.error("LobbyScreenGetLobby", "Error parsing lobbies: " + e);
@@ -228,8 +235,24 @@ public class LobbyScreen implements Screen {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                lobby.setNowPlayers(lobby.getNowPlayers() - 1);
+                NetworkClient.put(Main.url + "updateLobby/" + lobby.getLobbyId(), JsonParser.parse(JsonParser.toJson(lobby)), new HttpResponseListener() {
+                    @Override
+                    public void onSuccess(int statusCode, String response) {
+                        Gdx.app.log("LeaveLobby", "Leaved");
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String error) {
+                        Gdx.app.error("LeaveLobby", error);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        Gdx.app.error("LeaveLobby", t.getMessage());
+                    }
+                });
                 webSocketAction("DISCONNECTED", false);
-                webSocketClient.disconnect();
                 main.setScreen(main.getChooseModeScreen());
             }
         });
@@ -251,18 +274,16 @@ public class LobbyScreen implements Screen {
             JsonValue jsonD = JsonParser.parse(message);
             String type = jsonD.getString("type");
 
-            if ("LOBBY_STATE".equals(type)) {
-
+            if ("JOIN".equals(type) || "DISCONNECTED".equals(type)){
                 List<Player> newPlayers = new ArrayList<>();
 
                 for (JsonValue player : jsonD.get("players")){
                     Player player1 = new Player();
                     player1.setName(player.getString("name"));
+                    player1.setColor(player.getString("color"));
                     newPlayers.add(player1);
                 }
-
                 updatePlayersList(newPlayers);
-
             } else if ("START_GAME".equals(type)){
                 main.getGameScreen().setLobby(lobby);
                 main.setScreen(main.getGameScreen());
@@ -275,6 +296,7 @@ public class LobbyScreen implements Screen {
     private void updatePlayersList(List<Player> newPlayers) {
         players = new ArrayList<>();
         players.addAll(newPlayers);
+        lobby.setPlayerDTOS(players);
         createTableHeader();
 
         for(Player player : players) {
@@ -321,11 +343,13 @@ public class LobbyScreen implements Screen {
     public void resume() {}
 
     @Override
-    public void hide() {}
+    public void hide() {
+    }
 
     @Override
     public void dispose() {
         stage.dispose();
         batch.dispose();
+        webSocketClient.disconnect();
     }
 }

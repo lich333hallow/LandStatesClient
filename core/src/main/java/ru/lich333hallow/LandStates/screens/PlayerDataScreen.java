@@ -1,8 +1,11 @@
 package ru.lich333hallow.LandStates.screens;
 
+import static com.badlogic.gdx.math.MathUtils.random;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -56,6 +59,10 @@ public class PlayerDataScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 String name = nameInputWidget.getTextField().getText();
+                float r = random.nextFloat() * 0.7f + 0.3f; // R (0.3-1.0);
+                float g = random.nextFloat() * 0.7f + 0.3f; // G (0.3-1.0)
+                float b = random.nextFloat() * 0.7f + 0.3f; // B (0.3-1.0)
+                player.setColor(new Color(r, g, b, 1.0f).toString());
                 player.setName(name);
                 player.setPlayerId(UUID.randomUUID().toString());
 
@@ -131,6 +138,7 @@ public class PlayerDataScreen implements Screen {
         Preferences preferences = Gdx.app.getPreferences("LandStatePrefs");
         preferences.putString("name", main.getPlayer().getName());
         preferences.putString("playerId", main.getPlayer().getPlayerId());
+        preferences.putString("color", main.getPlayer().getColor());
         preferences.flush();
     }
 }

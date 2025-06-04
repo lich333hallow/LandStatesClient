@@ -216,6 +216,7 @@ public class AvailableLobbiesScreen implements Screen {
 
             @Override
             public void onFailure(Throwable t) {
+                System.out.println(t);
                 Gdx.app.error("findLobbies", "Error: " + t.getMessage());
             }
         });
@@ -227,8 +228,6 @@ public class AvailableLobbiesScreen implements Screen {
             selectedLobby.setNowPlayers(selectedLobby.getNowPlayers() + 1);
             selectedLobby.getPlayerDTOS().add(main.getPlayer());
             JsonValue jsonValue = JsonParser.parse(JsonParser.toJson(selectedLobby));
-
-            main.getLobbyScreen().getWebSocketClient().connect();
 
             main.getLobbyScreen().setLobby(selectedLobby);
 
@@ -248,7 +247,7 @@ public class AvailableLobbiesScreen implements Screen {
                     Gdx.app.error("LobbyConnectFail", "Error: " + t.getMessage());
                 }
             });
-            Gdx.app.log("Lobby", "Connecting to: " + selectedLobby.getLobbyName());
+            Gdx.app.log("LobbyConnect", "Connecting to: " + selectedLobby.getLobbyName());
         }
     }
 

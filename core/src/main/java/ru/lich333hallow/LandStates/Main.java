@@ -31,9 +31,9 @@ import ru.lich333hallow.LandStates.screens.SettingsScreen;
 @Getter
 @Setter
 public class Main extends Game {
-
-    public static final String url = "http://bbb.eduworks.ru:8080/api/";
-    public static final String urlWebSocket = "ws://bbb.eduworks.ru:8080/ws/";
+    // bbb.eduworks.ru:8080
+    public static final String url = "http://192.168.1.246:8080/api/";
+    public static final String urlWebSocket = "ws://192.168.1.246:8080/ws/";
 
     public static final int cost = 25;
 
@@ -48,22 +48,6 @@ public class Main extends Game {
     private Texture imageBackGround;
     private Texture map;
     private Texture coin;
-
-    private Texture miner_1;
-    private Image defender_1;
-    private Image base_1;
-
-    private Texture miner_2;
-    private Texture defender_2;
-    private Image base_2;
-
-    private Texture miner_3;
-    private Texture defender_3;
-    private Image base_3;
-
-    private Texture miner_4;
-    private Texture defender_4;
-    private Image base_4;
 
     private Music music;
 
@@ -86,7 +70,7 @@ public class Main extends Game {
         font72DarkGreenWithOutLine = new BitmapFont(Gdx.files.internal("fonts/exo272DarkGreenWithOutline.fnt"));
 
         imageBackGround = new Texture(Gdx.files.internal("backgrounds/menu_background.png"));
-        map = new Texture(Gdx.files.internal("backgrounds/map2.png"));
+        map = new Texture(Gdx.files.internal("backgrounds/map.png"));
 
         NinePatch upPatch = new NinePatch(new Texture(Gdx.files.internal("button/up.png")), 10, 10, 10, 10);
         NinePatch downPatch = new NinePatch(new Texture(Gdx.files.internal("button/down.png")), 10, 10, 10, 10);
@@ -103,22 +87,6 @@ public class Main extends Game {
         menuTextButtonStyle.font = font72DarkGreenWithOutLine;
         menuTextButtonStyle.up = new NinePatchDrawable(upPatch);
         menuTextButtonStyle.down = new NinePatchDrawable(downPatch);
-
-        base_1 = new Image(new Texture(Gdx.files.internal("bases/1_1.png")));
-        miner_1 = new Texture(Gdx.files.internal("bases/2_1.png"));
-        defender_1 = new Image(new Texture(Gdx.files.internal("bases/3_1.png")));
-
-        base_2 = new Image(new Texture(Gdx.files.internal("bases/1_2.png")));
-        miner_2 = new Texture(Gdx.files.internal("bases/2_2.png"));
-        defender_2 = new Texture(Gdx.files.internal("bases/3_2.png"));
-
-        base_3 = new Image(new Texture(Gdx.files.internal("bases/1_2.png")));
-        miner_3 = new Texture(Gdx.files.internal("bases/2_2.png"));
-        defender_3 = new Texture(Gdx.files.internal("bases/3_2.png"));
-
-        base_4 = new Image(new Texture(Gdx.files.internal("bases/1_2.png")));
-        miner_4 = new Texture(Gdx.files.internal("bases/2_2.png"));
-        defender_4 = new Texture(Gdx.files.internal("bases/3_2.png"));
 
         coin = new Texture(Gdx.files.internal("coin.png"));
 
@@ -145,12 +113,14 @@ public class Main extends Game {
 
         String name = preferences.getString("name", null);
         String playerId = preferences.getString("playerId", null);
+        String color = preferences.getString("color", null);
         stateMusic = preferences.getString("music", "Вкл");
         if(name == null || playerId == null){
             return;
         }
         player.setName(name);
         player.setPlayerId(playerId);
+        player.setColor(color);
     }
 
     @Override
@@ -162,14 +132,5 @@ public class Main extends Game {
         imageBackGround.dispose();
         map.dispose();
         coin.dispose();
-
-        miner_1.dispose();
-        miner_2.dispose();
-        miner_3.dispose();
-        miner_4.dispose();
-
-        defender_2.dispose();
-        defender_3.dispose();
-        defender_4.dispose();
     }
 }

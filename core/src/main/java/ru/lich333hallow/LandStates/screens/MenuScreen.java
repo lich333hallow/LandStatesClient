@@ -34,7 +34,6 @@ public class MenuScreen implements Screen {
         this.main = main;
 
         batch = main.getBatch();
-
         table = new Table();
         stage = new Stage(new ScreenViewport());
 
