@@ -14,4 +14,5 @@ public class StateDTO {
     private int peasants;
     private int miners;
     private int warriors;
+    private int sourceId;
 }

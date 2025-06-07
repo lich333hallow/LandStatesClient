@@ -16,7 +16,8 @@ public class StateConverter {
         stateDTO.setFood(state.getFood());
         stateDTO.setPeasants(state.getPeasants());
         stateDTO.setMiners(state.getMiners());
-        stateDTO.setWarriors(stateDTO.getWarriors());
+        stateDTO.setWarriors(state.getWarriors());
+        stateDTO.setSourceId(state.getSourceId());
 
         return stateDTO;
     }
@@ -30,6 +31,7 @@ public class StateConverter {
         modifiedState.setPeasants(stateDTO.getPeasants());
         modifiedState.setWarriors(stateDTO.getWarriors());
         modifiedState.setMiners(stateDTO.getMiners());
+        modifiedState.setSourceId(stateDTO.getSourceId());
         return modifiedState;
     }
 }

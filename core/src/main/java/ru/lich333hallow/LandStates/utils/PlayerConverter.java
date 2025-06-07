@@ -1,7 +1,9 @@
 package ru.lich333hallow.LandStates.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import ru.lich333hallow.LandStates.clientDTO.PlayerDTO;
 import ru.lich333hallow.LandStates.components.Base;
@@ -16,7 +18,7 @@ public class PlayerConverter {
         PlayerInGame player1 = new PlayerInGame();
 
         player1.setName(player.getName());
-        player1.setBalance(100);
+        player1.setBalance(0);
         player1.setColor(player.getColor());
         player1.setNumber(nextId++);
 
@@ -50,7 +52,7 @@ public class PlayerConverter {
         return playerDTO;
     }
 
-    public static PlayerInGame convert(PlayerDTO playerDTO, List<PlayerInGame> players){
+    public static PlayerInGame convert(PlayerDTO playerDTO, List<PlayerInGame> players) {
         PlayerInGame p = new PlayerInGame();
 
         p.setName(playerDTO.getName());
@@ -58,12 +60,32 @@ public class PlayerConverter {
         p.setColor(playerDTO.getColor());
         p.setBalance(playerDTO.getBalance());
 
-        List<State> states = players.stream().filter(p1 -> p1.getNumber() == p.getNumber()).findFirst().get().getBases();
+        Optional<PlayerInGame> existingPlayer = players.stream()
+            .filter(p1 -> p1.getNumber() == p.getNumber())
+            .findFirst();
+
+        List<State> existingStates = existingPlayer.map(PlayerInGame::getBases).orElse(Collections.emptyList());
         List<StateDTO> stateDTOS = playerDTO.getBases();
         List<State> merged = new ArrayList<>();
-        for (int i = 0; i < stateDTOS.size(); i++)  merged.add(StateConverter.convert(stateDTOS.get(i), states.get(i)));
+
+        for (int i = 0; i < stateDTOS.size(); i++) {
+            State existingState = i < existingStates.size() ? existingStates.get(i) : new State();
+            merged.add(StateConverter.convert(stateDTOS.get(i), existingState));
+        }
+
         p.setBases(merged);
 
+        return p;
+    }
+
+    public static List<Player> convert(List<PlayerInGame> playerInGames){
+        List<Player> p  = new ArrayList<>();
+        playerInGames.forEach(plg -> {
+            Player pl = new Player();
+            pl.setName(plg.getName());
+            pl.setColor(plg.getColor());
+            p.add(pl);
+        });
         return p;
     }
 }

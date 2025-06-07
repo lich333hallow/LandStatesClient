@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import ru.lich333hallow.LandStates.Main;
 import ru.lich333hallow.LandStates.components.Button;
-import ru.lich333hallow.LandStates.network.WebSocketClient;
 
 public class ChooseModeScreen implements Screen {
 
@@ -26,7 +25,7 @@ public class ChooseModeScreen implements Screen {
 
     private Button findGame;
     private Button createMultiplayerGame;
-    private Button createSoloGame;
+//    private Button createSoloGame;
     private Button back;
 
     public ChooseModeScreen(Main main){
@@ -46,12 +45,12 @@ public class ChooseModeScreen implements Screen {
 
         findGame = new Button("Найти игру", main.getMenuTextButtonStyle());
         createMultiplayerGame = new Button("Создать лобби", main.getMenuTextButtonStyle());
-        createSoloGame = new Button("Одиночная игра", main.getMenuTextButtonStyle());
+//        createSoloGame = new Button("Одиночная игра", main.getMenuTextButtonStyle());
         back = new Button("Назад", main.getMenuTextButtonStyle());
 
         findGame.pack();
         createMultiplayerGame.pack();
-        createSoloGame.pack();
+//        createSoloGame.pack();
         back.pack();
 
         findGame.addListener(new ClickListener(){
@@ -68,9 +67,9 @@ public class ChooseModeScreen implements Screen {
             }
         });
 
-        createSoloGame.addListener(new ClickListener(){
-            // TO-DO
-        });
+//        createSoloGame.addListener(new ClickListener(){
+//            // TO-DO
+//        });
 
         back.addListener(new ClickListener(){
             @Override
@@ -81,7 +80,7 @@ public class ChooseModeScreen implements Screen {
 
         table.add(findGame).padBottom(50).row();
         table.add(createMultiplayerGame).padBottom(50).row();
-        table.add(createSoloGame).padBottom(50).row();
+//        table.add(createSoloGame).padBottom(50).row();
         table.add(back);
         table.setFillParent(true);
         table.center();

@@ -7,28 +7,30 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.utils.Align;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class Base extends Actor {
+    private int id;
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
     private Color color;
     private String[] texts;
-    @Setter
-    @Getter
     private int selectedSector = 0;
     private final float markerRadius = 10f;
-    @Getter
     private int ownerId;
 
     // 0 - peasants
     // 1 - warriors
     // 2 - miners
 
-    public Base(Color color, String peasants, String warriors, String miners, int ownerId, int selectedSector) {
+    public Base(int id, Color color, String peasants, String warriors, String miners, int ownerId, int selectedSector) {
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
+        this.id = id;
         this.color = color;
         this.texts = new String[]{peasants, warriors, miners};
         this.ownerId = ownerId;

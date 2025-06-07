@@ -107,6 +107,7 @@ public class JsonParser {
             v.setPeasants(g.getInt("peasants"));
             v.setMiners(g.getInt("miners"));
             v.setWarriors(g.getInt("warriors"));
+            v.setSourceId(g.getInt("sourceId"));
             s.add(v);
         });
 

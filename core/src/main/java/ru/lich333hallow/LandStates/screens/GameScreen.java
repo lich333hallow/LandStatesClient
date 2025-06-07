@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -19,10 +21,13 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import lombok.Getter;
 import lombok.Setter;
 import ru.lich333hallow.LandStates.Main;
 import ru.lich333hallow.LandStates.clientDTO.PlayerDTO;
@@ -43,7 +48,7 @@ public class GameScreen implements Screen {
 
     private final Main main;
     private WebSocketClient webSocketClient;
-    private Image map;
+    private final Image map;
     private Stage stage;
     private PlayerInGame player;
     private ShapeRenderer shapeRenderer;
@@ -52,8 +57,20 @@ public class GameScreen implements Screen {
     private Vector2 touchPos;
     private boolean isDragging;
     private ScreenViewport screenViewport;
-    private HashMap<Integer, List<State>> playerBases = new HashMap<>();
-    private HashMap<Integer, Base> neutrals = new HashMap<>();
+    private final HashMap<Integer, List<State>> playerBases = new HashMap<>();
+    private final HashMap<Integer, Base> neutrals = new HashMap<>();
+
+    private BitmapFont balanceFont;
+    private GlyphLayout balanceLayout;
+
+    private Base selectedBase;
+    private GlyphLayout baseInfoLayout1;
+    private BitmapFont baseInfoFont;
+    private ShapeRenderer selectionRenderer;
+    private boolean showBaseInfo;
+    @Setter
+    @Getter
+    private float selectionLineWidth = 4.0f;
 
     @Setter
     private Lobby lobby;
@@ -62,10 +79,14 @@ public class GameScreen implements Screen {
 
     public GameScreen(Main main) {
         this.main = main;
-
         map = new Image(main.getMap());
-
         map.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        map.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                deselectBase();
+            }
+        });
 
     }
 
@@ -86,6 +107,12 @@ public class GameScreen implements Screen {
         screenViewport = new ScreenViewport();
         stage = new Stage(screenViewport);
 
+        baseInfoFont = main.getFont72DarkGreenWithOutLine();
+        baseInfoLayout1 = new GlyphLayout();
+        selectionRenderer = new ShapeRenderer();
+        selectionRenderer.setAutoShapeType(true);
+        showBaseInfo = false;
+
         /* Это убрать !! */
 //        lobby = new Lobby();
 //        lobby.setNumberOfPlayers(4);
@@ -97,6 +124,8 @@ public class GameScreen implements Screen {
 //        lobby.setPlayerDTOS(s);
 
         stage.addActor(map);
+
+        balanceFont = main.getFont72DarkGreenWithOutLine();
 
         shapeRenderer = new ShapeRenderer();
         Gdx.input.setInputProcessor(stage);
@@ -137,6 +166,8 @@ public class GameScreen implements Screen {
                 Gdx.app.error("WebSocketLobbyConnect", "Error: " + error.getMessage());
             }
         });
+        balanceLayout = new GlyphLayout();
+        updateBalanceText();
     }
 
     private void addBaseListener(Base base) {
@@ -145,6 +176,7 @@ public class GameScreen implements Screen {
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 if(base.getOwnerId() != player.getNumber()) return false;
                 sourceImage = (Base) event.getTarget();
+                selectBase(base);
                 touchPos = new Vector2(
                     event.getStageX(),
                     event.getStageY()
@@ -181,9 +213,13 @@ public class GameScreen implements Screen {
     }
 
     private void changeUnitType(Base base){
-        State state = playerBases.get(base.getOwnerId()).stream().filter(s -> s.getBase().equals(base)).findFirst().get();
+        State state = playerBases.get(base.getOwnerId()).stream().filter(s -> s.getBase().getId() == base.getId()).findFirst().get();
         state.setType(state.getBase().getSelectedSector());
         actionPlayer("CHANGE_TYPE", player, player, StateConverter.convert(state));
+    }
+
+    private void updateBalanceText() {
+        balanceLayout.setText(balanceFont, "Баланс: " + player.getBalance());
     }
 
     private void handleWebSocketMessage(String message) {
@@ -194,9 +230,10 @@ public class GameScreen implements Screen {
                 PlayerDTO value = JsonParser.convertFromValue(jsonD.get("playerModelInGame"));
                 PlayerInGame updatedPlayer = PlayerConverter.convert(value, players);
 
-                players = players.stream()
-                    .map(p -> p.getNumber() == updatedPlayer.getNumber() ? updatedPlayer : p)
-                    .collect(Collectors.toList());
+                if((updatedPlayer.getBalance() != player.getBalance()) && (updatedPlayer.getNumber() == player.getNumber())){
+                    player.setBalance(updatedPlayer.getBalance());
+                    updateBalanceText();
+                }
 
                 updatedPlayer.getBases().forEach(base -> {
                     base.getBase().setTexts(
@@ -205,21 +242,131 @@ public class GameScreen implements Screen {
                         base.getMiners() + ""
                     );
                 });
+                playerBases.put(updatedPlayer.getNumber(), updatedPlayer.getBases());
+                if(selectedBase != null) {
+                    if (selectedBase.getOwnerId() == updatedPlayer.getNumber()) {
+                        selectedBase = playerBases.get(updatedPlayer.getNumber()).stream().filter(f -> f.getId() == selectedBase.getId()).findFirst().get().getBase();
+                        selectBase(selectedBase);
+                    }
+                }
+                players = players.stream()
+                    .map(p -> p.getNumber() == updatedPlayer.getNumber() ? updatedPlayer : p)
+                    .collect(Collectors.toList());
+            }  else if (type.equals("CAPTURED_NEUTRAL")){
+                PlayerDTO value = JsonParser.convertFromValue(jsonD.get("playerModelInGame"));
+                PlayerInGame updatedPlayer = PlayerConverter.convert(value, players);
+
+                State l = updatedPlayer.getBases().get(updatedPlayer.getBases().size() - 1);
+                System.out.println(l);
+                Base b = neutrals.get(l.getSourceId());
+                neutrals.remove(l.getSourceId());
+                b.setId(l.getId());
+                b.setColor(Color.valueOf(updatedPlayer.getColor()));
+                b.setOwnerId(updatedPlayer.getNumber());
+                b.addListener(CreateClickListener.createListener(b));
+                addBaseListener(b);
+                if(updatedPlayer.getName().equals(player.getName())) b.setSelectedSector(0);
+
+                l.setBase(b);
+                playerBases.get(updatedPlayer.getNumber()).add(l);
+                players = players.stream()
+                    .map(p -> p.getNumber() == updatedPlayer.getNumber() ? updatedPlayer : p)
+                    .collect(Collectors.toList());
+
+            } else if (type.equals("CAPTURED")){
+                Gdx.app.log("MESSAGE_LOBBY", message);
+                PlayerDTO attackerDTO = JsonParser.convertFromValue(jsonD.get("playerModelInGame"));
+                PlayerDTO defenderDTO = JsonParser.convertFromValue(jsonD.get("target"));
+                PlayerInGame attacker = PlayerConverter.convert(attackerDTO, players);
+                PlayerInGame defender = PlayerConverter.convert(defenderDTO, players);
+                IntStream.range(0, defender.getBases().size()).forEach(i -> defender.getBases().get(i).setId(i));
+
+                State attackerState = attacker.getBases().get(attacker.getBases().size() - 1);
+                Base b = playerBases.get(defender.getNumber()).remove(attackerState.getSourceId()).getBase();
+                b.setId(attackerState.getId());
+                b.setColor(Color.valueOf(attacker.getColor()));
+                b.setOwnerId(attacker.getNumber());
+                b.setSelectedSector(-1);
+                if(attacker.getName().equals(player.getName())) b.setSelectedSector(0);
+
+                attackerState.setBase(b);
+                playerBases.get(attacker.getNumber()).add(attackerState);
+                players = players.stream()
+                    .map(p -> p.getNumber() == attacker.getNumber() ? attacker : p)
+                    .collect(Collectors.toList());
+                if(defender.getBases().isEmpty() && defender.getNumber() == player.getNumber()){
+                    webSocketClient.disconnect();
+                    playerBases.remove(defender.getNumber());
+                    players.removeIf(p -> p.getNumber() == defender.getNumber());
+                    main.getResultsScreen().setLobby(lobby);
+                    main.setScreen(main.getResultsScreen());
+                }
+            } else if(type.equals("FINISH_GAME")){
+                List<PlayerDTO> value = new ArrayList<>();
+                jsonD.get("winners").forEach(j -> value.add(JsonParser.convertFromValue(j)));
+                List<PlayerInGame> winners = new ArrayList<>();
+                value.forEach(v -> winners.add(PlayerConverter.convert(v, players)));
+                webSocketClient.disconnect();
+                main.getResultsScreen().setLobby(lobby);
+                main.getResultsScreen().setWinner(PlayerConverter.convert(winners));
+                main.setScreen(main.getResultsScreen());
+            } else {
+                Gdx.app.log("MESSAGE_LOBBY", message);
             }
-//            Gdx.app.log("MESSAGE_LOBBY", message);
         } catch (Exception e) {
-            Gdx.app.error("WebSocketLobby", "Error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private void performAction(Base source, Base target) {
-        if(source.getOwnerId() != player.getNumber()) return;
-        System.out.println(source);
+        Optional<PlayerInGame> attacker = players.stream()
+            .filter(pl -> pl.getNumber() == source.getOwnerId())
+            .findFirst();
+
+        if (attacker.isEmpty()) return;
+        Optional<State> sourceState = attacker.get().getBases().stream()
+            .filter(s -> s.getBase().getId() == source.getId())
+            .findFirst();
+
+        if(sourceState.isEmpty() || sourceState.get().getWarriors() <= 0) return;
+
+        if (target.getOwnerId() == -1) {
+            System.out.println(target.getTexts()[1]);
+            State attackState = new State(
+                target.getId(),
+                0,
+                0,
+                target,
+                0,
+                0,
+                Integer.parseInt(target.getTexts()[1]),
+                source.getId()
+            );
+            String peas = sourceState.get().getBase().getTexts()[0];
+            String miners = sourceState.get().getBase().getTexts()[2];
+            String warriors = "1";
+            sourceState.get().getBase().setTexts(peas, warriors, miners);
+
+            actionPlayer("NEUTRAL", attacker.get(), attacker.get(), StateConverter.convert(attackState));
+        } else if(target.getOwnerId() != source.getOwnerId()){
+            Optional<PlayerInGame> defender = players.stream()
+                .filter(pl -> pl.getNumber() == target.getOwnerId()).findFirst();
+            if (defender.isEmpty()) return;
+            Optional<State> defendState = defender.get().getBases().stream()
+                .filter(s -> s.getBase().getId() == target.getId()).findFirst();
+            if (defendState.isEmpty()) return;
+            String peas = sourceState.get().getBase().getTexts()[0];
+            String miners = sourceState.get().getBase().getTexts()[2];
+            String warriors = "1";
+            sourceState.get().getBase().setTexts(peas, warriors, miners);
+            defendState.get().setSourceId(sourceState.get().getId());
+            actionPlayer("ATTACK", attacker.get(), defender.get(), StateConverter.convert(defendState.get()));
+        }
     }
 
     private void initNeutrals(){
         for (int i = 0; i < 16; i++) {
-            neutrals.put(i, new Base(Color.GRAY, "0", "15", "0", -1, -1));
+            neutrals.put(i, new Base(i, Color.GRAY, "0", "5", "0", -1, -1));
         }
         setCoordinatesForNeutrals();
     }
@@ -250,10 +397,14 @@ public class GameScreen implements Screen {
             List<State> states = new ArrayList<>();
             int f = 0;
             if(!(player.getName().equals(players.get(i).getName()))) f = -1;
-            states.add(new State(i, 0, 100, new Base(Color.valueOf(players.get(i).getColor().replace("#", "")), "10", "0", "0", i, f), 50, 0, 0));
+            states.add(new State(i, 0, 100, new Base(i, Color.valueOf(players.get(i).getColor().replace("#", "")), "10", "0", "0", i, f), 10, 0, 0, 0));
             players.get(i).setBases(states);
             playerBases.put(i, states);
         }
+
+//        /* Убрать */
+//        playerBases.get(0).get(0).setWarriors(16);
+//        playerBases.get(0).get(0).getBase().setTexts("10", "16", "0");
         setCoordinatesForBases();
     }
 
@@ -299,6 +450,28 @@ public class GameScreen implements Screen {
         );
     }
 
+    private void selectBase(Base base) {
+        deselectBase();
+        selectedBase = base;
+        showBaseInfo = true;
+        updateSelectBase();
+    }
+
+    private void deselectBase() {
+        selectedBase = null;
+        showBaseInfo = false;
+        baseInfoLayout1.setText(baseInfoFont, "");
+    }
+
+    private void updateSelectBase(){
+        if(selectedBase != null){
+            Optional<State> state = playerBases.get(selectedBase.getOwnerId()).stream()
+                .filter(s -> s.getBase().getId() == selectedBase.getId())
+                .findFirst();
+            state.ifPresent(value -> baseInfoLayout1.setText(baseInfoFont, "Еда: " + value.getFood()));
+        }
+    }
+
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(255, 255, 255, 1);
@@ -306,6 +479,37 @@ public class GameScreen implements Screen {
 
         stage.act(delta);
         stage.draw();
+
+        float textX = 20;
+        float textY = Gdx.graphics.getHeight() - 20;
+        stage.getBatch().begin();
+        balanceFont.draw(stage.getBatch(), balanceLayout, textX, textY);
+        if (showBaseInfo && selectedBase != null) {
+            float infoX = Gdx.graphics.getWidth() - 300;
+            float infoY = Gdx.graphics.getHeight() - 50;
+            baseInfoFont.draw(stage.getBatch(), baseInfoLayout1, infoX, infoY);
+        }
+        stage.getBatch().end();
+
+        if (selectedBase != null) {
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            Gdx.gl.glLineWidth(selectionLineWidth);
+
+            selectionRenderer.setProjectionMatrix(stage.getCamera().combined);
+            selectionRenderer.begin(ShapeRenderer.ShapeType.Line);
+            selectionRenderer.setColor(Color.YELLOW);
+
+            float centerX = selectedBase.getX() + selectedBase.getWidth() / 2;
+            float centerY = selectedBase.getY() + selectedBase.getHeight() / 2;
+            float radius = Math.max(selectedBase.getWidth(), selectedBase.getHeight()) / 2;
+
+            selectionRenderer.circle(centerX, centerY, radius, 100);
+
+            selectionRenderer.end();
+            Gdx.gl.glLineWidth(1.0f);
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+        }
 
         if (isDragging && sourceImage != null) {
             Vector2 imageCenter = new Vector2(
@@ -357,6 +561,9 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+        balanceFont.dispose();
+        baseInfoFont.dispose();
+        selectionRenderer.dispose();
     }
 }
 
