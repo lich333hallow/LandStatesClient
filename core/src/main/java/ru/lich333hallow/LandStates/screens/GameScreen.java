@@ -250,13 +250,15 @@ public class GameScreen implements Screen {
             Optional<PlayerInGame> defender = players.stream()
                 .filter(p -> p.getNumber() == target.getOwnerId())
                 .findFirst();
+            System.out.println(defender);
             if (defender.isEmpty()) return;
 
             Optional<State> defendState = defender.get().getBases().stream()
                 .filter(s -> s.getBase().getId() == target.getId())
                 .findFirst();
+            System.out.println(defendState);
             if (defendState.isEmpty()) return;
-
+            System.out.println("ATTACK");
             defendState.get().setSourceId(attack.getSourceId());
             actionPlayer("ATTACK", attacker.get(), defender.get(),
                 StateConverter.convert(defendState.get()));
@@ -369,11 +371,8 @@ public class GameScreen implements Screen {
                         .collect(Collectors.toList());
                     warriorProjectiles.forEach(w -> w.updatePlayers(players));
                     if (defender.getBases().isEmpty() && defender.getNumber() == player.getNumber()) {
-                        webSocketClient.disconnect();
                         playerBases.remove(defender.getNumber());
-                        players.removeIf(p -> p.getNumber() == defender.getNumber());
                         main.getResultsScreen().setLobby(lobby);
-                        main.setScreen(main.getResultsScreen());
                     }
                 }
                 case "FINISH_GAME" -> {
@@ -465,7 +464,7 @@ public class GameScreen implements Screen {
     }
 
     private void initNeutrals(){
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 27; i++) {
             neutrals.put(i, new Base(i, Color.GRAY, "0", "5", "0", -1, -1));
         }
         setCoordinatesForNeutrals();
@@ -490,6 +489,17 @@ public class GameScreen implements Screen {
         neutrals.get(13).setPosition(width * 0.4f, height * 0.4f);
         neutrals.get(14).setPosition(width * 0.45f, height * 0.54f);
         neutrals.get(15).setPosition(width * 0.35f, height * 0.68f);
+        neutrals.get(16).setPosition(width * 0.4f, height * 0.8f);
+        neutrals.get(17).setPosition(width * 0.47f, height * 0.7f);
+        neutrals.get(18).setPosition(width * 0.68f, height * 0.85f);
+        neutrals.get(19).setPosition(width * 0.65f, height * 0.73f);
+        neutrals.get(20).setPosition(width * 0.6f, height * 0.6f);
+        neutrals.get(21).setPosition(width * 0.55f, height * 0.43f);
+        neutrals.get(22).setPosition(width * 0.73f, height * 0.6f);
+        neutrals.get(23).setPosition(width * 0.7f, height * 0.48f);
+        neutrals.get(24).setPosition(width * 0.8f, height * 0.48f);
+        neutrals.get(25).setPosition(width * 0.78f, height * 0.37f);
+        neutrals.get(26).setPosition(width * 0.65f, height * 0.35f);
     }
 
     private void initBases(){
@@ -628,7 +638,7 @@ public class GameScreen implements Screen {
                     center.y + (radius + 15) * (float)Math.sin(Math.toRadians(angle))
                 );
 
-                shapeRenderer.setColor(attack.getProjectiles().getFirst().getOwnerColor());
+                shapeRenderer.setColor(attack.getProjectiles().get(0).getOwnerColor());
                 shapeRenderer.circle(pos.x, pos.y, 5);
             }
         }

@@ -32,8 +32,9 @@ import ru.lich333hallow.LandStates.screens.SettingsScreen;
 @Setter
 public class Main extends Game {
     // bbb.eduworks.ru:8080
-    public static final String url = "http://192.168.1.246:8080/api/";
-    public static final String urlWebSocket = "ws://192.168.1.246:8080/ws/";
+    // 192.168.1.246
+    public static final String url = "http://bbb.eduworks.ru:8080/api/";
+    public static final String urlWebSocket = "ws://bbb.eduworks.ru:8080/ws/";
 
     public static final int cost = 25;
 
