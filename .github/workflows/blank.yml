@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'corretto'
-          java-verison: '21'
+          java-version: '21'
           
       - name: Build apk
         run: ./gradlew assembleRelease
