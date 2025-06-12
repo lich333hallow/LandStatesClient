@@ -19,10 +19,13 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '21'
+
+      - name: Grant Permission
+        run: chmod -R 777 ./gradlew
           
       - name: Build apk
         run: ./gradlew assembleRelease
 
-      - name: Build apk
+      - name: Build abb
         run: ./gradlew bundleRelease
       
