@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           java-version: '21'
-          distribution: 'temurin'
+          distribution: 'jetbrains'
 
       - name: Grant Permission
         run: chmod -R 777 ./gradlew
