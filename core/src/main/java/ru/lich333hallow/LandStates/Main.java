@@ -49,6 +49,8 @@ public class Main extends Game {
     private Texture imageBackGround;
     private Texture map;
     private Texture coin;
+    private Texture sword;
+    private Texture food;
 
     private Music music;
 
@@ -90,6 +92,8 @@ public class Main extends Game {
         menuTextButtonStyle.down = new NinePatchDrawable(downPatch);
 
         coin = new Texture(Gdx.files.internal("coin.png"));
+        food = new Texture(Gdx.files.internal("food.png"));
+        sword = new Texture(Gdx.files.internal("sword.png"));
 
         enterNameTextAreaStyle = new TextField.TextFieldStyle();
         enterNameTextAreaStyle.font = new BitmapFont();

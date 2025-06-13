@@ -2,6 +2,7 @@ package ru.lich333hallow.LandStates.components;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -21,13 +22,15 @@ public class Base extends Actor {
     private String[] texts;
     private int selectedSector = 0;
     private final float markerRadius = 10f;
+    private final float markerSize = 35f;
     private int ownerId;
+    private TextureRegion[] sectorIcons;
 
-    // 0 - peasants
-    // 1 - warriors
-    // 2 - miners
+    public static final int PEASANTS_SECTOR = 0;
+    public static final int WARRIORS_SECTOR = 1;
+    public static final int MINERS_SECTOR = 2;
 
-    public Base(int id, Color color, String peasants, String warriors, String miners, int ownerId, int selectedSector) {
+    public Base(int id, Color color, String peasants, String warriors, String miners, int ownerId, int selectedSector, TextureRegion[] sectorIcons) {
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
         this.id = id;
@@ -35,6 +38,7 @@ public class Base extends Actor {
         this.texts = new String[]{peasants, warriors, miners};
         this.ownerId = ownerId;
         this.selectedSector = selectedSector;
+        this.sectorIcons = sectorIcons;
 
         setSize(75, 75);
     }
@@ -77,15 +81,6 @@ public class Base extends Actor {
         shapeRenderer.arc(centerX, centerY, radius, 120, 120, 100);
         shapeRenderer.arc(centerX, centerY, radius, 240, 120, 100);
 
-        if (selectedSector >= 0) {
-            float markerAngle = selectedSector * 120 + 60;
-            float markerX = (float) (centerX + (radius + markerRadius * 1.5) * Math.cos(Math.toRadians(markerAngle)));
-            float markerY = (float) (centerY + (radius + markerRadius * 1.5) * Math.sin(Math.toRadians(markerAngle)));
-
-            shapeRenderer.setColor(Color.LIGHT_GRAY);
-            shapeRenderer.circle(markerX, markerY, markerRadius);
-        }
-
         shapeRenderer.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -99,10 +94,18 @@ public class Base extends Actor {
         }
 
         shapeRenderer.circle(centerX, centerY, radius);
-
         shapeRenderer.end();
 
         batch.begin();
+
+        if (selectedSector >= 0 && sectorIcons != null && selectedSector < sectorIcons.length
+            && sectorIcons[selectedSector] != null) {
+            float markerAngle = selectedSector * 120 + 60;
+            float markerX = (float) (centerX + (radius + markerSize / 2) * Math.cos(Math.toRadians(markerAngle)) - markerSize / 2);
+            float markerY = (float) (centerY + (radius + markerSize / 2) * Math.sin(Math.toRadians(markerAngle)) - markerSize / 2);
+
+            batch.draw(sectorIcons[selectedSector], markerX, markerY, markerSize, markerSize);
+        }
 
         for (int i = 0; i < 3; i++) {
             float textAngle = i * 120 + 60;

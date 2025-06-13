@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -84,6 +85,7 @@ public class GameScreen implements Screen {
     private Lobby lobby;
 
     private List<PlayerInGame> players = new ArrayList<>();
+    private TextureRegion[] textures;
 
     public GameScreen(Main main) {
         this.main = main;
@@ -120,6 +122,12 @@ public class GameScreen implements Screen {
         selectionRenderer = new ShapeRenderer();
         selectionRenderer.setAutoShapeType(true);
         showBaseInfo = false;
+
+        TextureRegion peasantIcon = new TextureRegion(main.getFood());
+        TextureRegion warriorIcon = new TextureRegion(main.getSword());
+        TextureRegion minerIcon = new TextureRegion(main.getCoin());
+
+        textures = new TextureRegion[]{peasantIcon, warriorIcon, minerIcon};
 
         /* Это убрать !! */
 //        lobby = new Lobby();
@@ -465,7 +473,7 @@ public class GameScreen implements Screen {
 
     private void initNeutrals(){
         for (int i = 0; i < 27; i++) {
-            neutrals.put(i, new Base(i, Color.GRAY, "0", "5", "0", -1, -1));
+            neutrals.put(i, new Base(i, Color.GRAY, "0", "5", "0", -1, -1, textures));
         }
         setCoordinatesForNeutrals();
     }
@@ -507,7 +515,7 @@ public class GameScreen implements Screen {
             List<State> states = new ArrayList<>();
             int f = 0;
             if(!(player.getName().equals(players.get(i).getName()))) f = -1;
-            states.add(new State(i, 0, 100, new Base(i, Color.valueOf(players.get(i).getColor().replace("#", "")), "10", "0", "0", i, f), 10, 0, 0, 0));
+            states.add(new State(i, 0, 100, new Base(i, Color.valueOf(players.get(i).getColor().replace("#", "")), "10", "0", "0", i, f, textures), 10, 0, 0, 0));
             players.get(i).setBases(states);
             playerBases.put(i, states);
         }
